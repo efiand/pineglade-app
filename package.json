@@ -1,0 +1,25 @@
+{
+  "name": "pineglade-app",
+  "version": "0.0.1",
+  "description": "Engine for launching and assembling small and medium-sized sites.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/efiand/pineglade-app.git"
+  },
+  "keywords": [],
+  "author": "efiand",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/efiand/pineglade-app/issues"
+  },
+  "homepage": "https://github.com/efiand/pineglade-app#readme",
+  "dependencies": {
+    "pineglade-config": "2.0.5",
+    "pineglade-pp": "1.1.4",
+    "pineglade-w3c": "1.0.3"
+  }
+}
