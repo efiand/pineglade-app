@@ -18,6 +18,13 @@ export const Dest = {
 	SSR_BUNDLE_NAME: 'ssr.bundle.js'
 };
 
+export const cssnanoOptions = {
+	preset: [
+		'default',
+		{ cssDeclarationSorter: false, discardComments: { removeAll: true } }
+	]
+};
+
 export const terserOptions = {
 	format: {
 		comments: false
