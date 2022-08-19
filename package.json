@@ -2,7 +2,8 @@
   "name": "pineglade-app",
   "version": "0.0.1",
   "description": "Engine for launching and assembling small and medium-sized sites.",
-  "main": "index.js",
+  "main": "main.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,8 +19,17 @@
   },
   "homepage": "https://github.com/efiand/pineglade-app#readme",
   "dependencies": {
-    "pineglade-config": "2.0.5",
+    "chalk": "5.0.1",
+    "eslint": "8.22.0",
+    "globs": "0.1.4",
     "pineglade-pp": "1.1.4",
-    "pineglade-w3c": "1.0.3"
+    "pineglade-w3c": "1.0.3",
+    "stylelint": "14.10.0",
+    "svelte": "3.49.0",
+    "svelte-loader": "3.1.3",
+    "svelte-routing": "1.6.0",
+    "terser-webpack-plugin": "5.3.5",
+    "typescript": "4.7.4",
+    "webpack": "5.74.0"
   }
 }
