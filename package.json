@@ -58,13 +58,6 @@
 		"webpack": "5.74.0"
 	},
 	"pre-commit": "test",
-	"babel": {
-		"presets": [
-			[
-				"@babel/preset-env"
-			]
-		]
-	},
 	"browserslist": [
 		"last 6 version",
 		"not dead",

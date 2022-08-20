@@ -23,6 +23,9 @@
 			}
 		}
 	],
+	"parserOptions": {
+		"requireConfigFile": false
+	},
 	"plugins": [
 		"svelte3"
 	],
