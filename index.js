@@ -1,5 +1,5 @@
 import { Pattern, isCompile, isSelf, isTest } from './constants.js';
-import App from './lib/app.js';
+import App from './lib/App.js';
 
 (async () => {
 	const app = new App();
