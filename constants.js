@@ -14,14 +14,14 @@ export const HttpMethod = {
 
 export const Pattern = {
 	CSS_ENTRIES: 'source/styles/*.css',
-	EDITORCONFIG: ['*.{js,json,md}', '.*', 'source/**/*'],
+	DEFAULT_IGNORE: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
+	EDITORCONFIG: ['*.{js,json,md}', '.*', 'source/**/*', '!**/*.{avif,jpg,png,webp}'],
 	IMAGES_ICONS: 'source/icons/**/*.svg',
 	IMAGES_PLACE: 'source/place/**/*.{jpg,png, svg}',
 	JS_BUILDABLES: 'source/**/*.{js,svelte}',
 	JS_ENTRIES: ['source/scripts/*.js', 'source/components/Body.svelte'],
 	JS_ENTRIES_SERVER: 'source/components/Body.svelte',
 	JS_LINTABLES: '*.js',
-	JS_LINTABLES_SELF: ['*.js', '**/*.js'],
 	SOURCE: 'source'
 };
 
