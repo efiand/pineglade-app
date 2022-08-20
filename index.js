@@ -15,6 +15,10 @@ import App from './lib/app.js';
 	}
 
 	if (isCompile) {
-		await Promise.all([app.buildScripts(), app.buildStyles()]);
+		await Promise.all([
+			app.buildScripts(),
+			app.buildStyles(),
+			app.createWebImages()
+		]);
 	}
 })();

@@ -42,9 +42,10 @@ export const lintSpaces = createTask({
 });
 
 export const lintStyles = createTask({
-	entries: Pattern.CSS_LINTABLES,
 	logTitle: 'Lint styles',
-	processBulk: processLintStyles
+	pattern: Pattern.CSS_LINTABLES,
+	processBulk: processLintStyles,
+	usseGlob: false
 });
 
 // Проверка кода самого приложения
