@@ -14,6 +14,7 @@ export const HttpMethod = {
 
 export const Pattern = {
 	CSS_ENTRIES: 'source/styles/*.css',
+	CSS_LINTABLES: 'source/styles/**/*.css',
 	DEFAULT_IGNORE: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
 	EDITORCONFIG: ['*.{js,json,md}', '.*', 'source/**/*', '!**/*.{avif,jpg,png,webp}'],
 	IMAGES_ICONS: 'source/icons/**/*.svg',
@@ -45,6 +46,8 @@ export const terserOptions = {
 		comments: false
 	}
 };
+
+export const appName = 'Pineglade app';
 
 export const DEFAUT_PORT = 4444;
 export const port = process.env.PORT || DEFAUT_PORT;

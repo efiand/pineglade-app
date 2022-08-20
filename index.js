@@ -1,7 +1,8 @@
 import { isCompile, isSelf, isTest } from './constants.js';
-import app from './lib/app.js';
+import App from './lib/app.js';
 
 (async () => {
+	const app = new App();
 	await app.configure();
 
 	if (isSelf) {
@@ -10,7 +11,7 @@ import app from './lib/app.js';
 
 	// Тестируем приложение перед сборкой
 	if (isCompile || isTest) {
-		await Promise.all([app.lintSpaces(), app.lintScripts()]);
+		await Promise.all([app.lintSpaces(), app.lintScripts(), app.lintStyles()]);
 	}
 
 	if (isCompile) {
