@@ -18,7 +18,7 @@ export const Pattern = {
 	DEFAULT_IGNORE: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
 	EDITORCONFIG: ['*.{js,json,md}', '.*', 'source/**/*', '!**/*.{avif,jpg,png,webp}'],
 	IMAGES_ICONS: 'source/icons/**/*.svg',
-	IMAGES_PLACE: 'source/place/**/*.{jpg,png, svg}',
+	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
 	JS_BUILDABLES: 'source/**/*.{js,svelte}',
 	JS_ENTRIES: ['source/scripts/*.js', 'source/components/Body.svelte'],
 	JS_ENTRIES_SERVER: 'source/components/Body.svelte',
