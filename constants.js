@@ -1,4 +1,14 @@
-import getFullPath from './lib/getFullPath.js';
+import { resolve } from 'path';
+
+export const [, appPath, script = 'linter'] = process.argv;
+export const CWD = process.cwd();
+export const isSelf = CWD === appPath;
+export const isBuilder = script === 'builder';
+export const isWatcher = script === 'watcher';
+
+export const DEFAUT_PORT = 1993;
+export const port = process.env.PORT || DEFAUT_PORT;
+export const host = `${process.env.HOST || 'http://localhost'}:${port}`;
 
 export const ExitCode = {
 	ERROR: 1,
@@ -13,24 +23,33 @@ export const HttpMethod = {
 };
 
 export const Pattern = {
+	CSS: 'source/styles/**/*.css',
 	CSS_ENTRIES: 'source/styles/*.css',
-	CSS_LINTABLES: 'source/styles/**/*.css',
-	DEFAULT_IGNORE: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
-	EDITORCONFIG: ['*.{js,json,md}', '.*', 'source/**/*', '!**/*.{avif,jpg,png,webp}'],
+	DEFAULT_IGNORES: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
+	EDITORCONFIG: [
+		'.*',
+		'**/*',
+		'!**/*.{avif,ico,jpg,png,webp,woff,woff2}',
+		'!public/**/*.html'
+	],
+	HTML: ['source/components/pages/**/*.svelte'],
 	IMAGES_ICONS: 'source/icons/**/*.svg',
 	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
-	JS_BUILDABLES: 'source/**/*.{js,svelte}',
-	JS_ENTRIES: ['source/scripts/*.js', 'source/components/Body.svelte'],
-	JS_ENTRIES_SERVER: 'source/components/Body.svelte',
-	JS_LINTABLES: '*.js',
-	SOURCE: 'source'
+	JS: ['*.js', '**/*.{js,svelte}'],
+	JS_CLIENT: ['source/scripts/*.js', 'source/components/Page.svelte'],
+	JS_SERVER: 'source/components/Page.svelte',
+	LAYOUT: 'source/layout.html',
+	MD: ['**/*.md'],
+	SOURCE: 'source',
+	SSR_BUNDLE: '.app/ssr.bundle.js'
 };
 
 export const Dest = {
-	CSS: getFullPath('public/styles'),
-	IMAGES: getFullPath('public/images'),
-	JS: getFullPath('public/scripts'),
-	MAIN: getFullPath('public'),
+	APP_OUTPUT: resolve(CWD, '.app'),
+	CSS: resolve(CWD, 'public/styles'),
+	IMAGES: resolve(CWD, 'public/images'),
+	JS: resolve(CWD, 'public/scripts'),
+	MAIN: resolve(CWD, 'public'),
 	SSR_BUNDLE_NAME: 'ssr.bundle.js'
 };
 
@@ -46,24 +65,3 @@ export const terserOptions = {
 		comments: false
 	}
 };
-
-export const appName = 'Pineglade app';
-
-export const DEFAUT_PORT = 4444;
-export const port = process.env.PORT || DEFAUT_PORT;
-
-export const host = `${process.env.HOST || 'http://localhost'}:${port}`;
-
-export const __dirname = process.cwd();
-
-export const [, appPath, script = 'start'] = process.argv;
-
-export const isBuild = script === 'build';
-export const isDev = script === 'dev';
-export const isStart = script === 'start';
-export const isTest = script === 'test';
-export const isSelf = script === 'self';
-export const isProd = !isDev;
-export const isCompile = isBuild || isDev;
-
-export const mode = isDev ? 'development' : 'production'; // Webpack compatibility
