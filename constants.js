@@ -2,7 +2,7 @@ import { resolve } from 'path';
 
 export const appName = 'PinegladeApp';
 
-export const [, appPath, script = 'linter'] = process.argv;
+export const [, appPath, script = 'start'] = process.argv;
 export const CWD = process.cwd();
 export const isSelf = CWD === appPath;
 export const isLint = script === 'lint';
@@ -38,7 +38,7 @@ export const Pattern = {
 		'!public/**/*.html'
 	],
 	HTML: ['source/components/pages/**/*.svelte'],
-	IMAGES_ICONS: 'source/icons/**/*.svg',
+	ICONS: 'source/icons/**/*.svg',
 	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
 	JS: ['*.js', '**/*.{js,svelte}'],
 	JS_CLIENT: ['source/scripts/*.js', 'source/components/Page.svelte'],

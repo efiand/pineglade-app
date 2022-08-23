@@ -32,7 +32,10 @@ const configure = ({ customMedia = null, functions = null }) => {
 		processor.use(postcssMedia(customMedia));
 	}
 
-	processor.use(mqpacker).use(calc).use(autoprefixer);
+	processor
+		.use(mqpacker)
+		.use(calc({ precision: 8 }))
+		.use(autoprefixer);
 
 	if (!isDev) {
 		processor.use(cssnano(cssnanoOptions));

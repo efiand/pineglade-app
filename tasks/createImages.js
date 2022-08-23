@@ -1,8 +1,8 @@
 import { basename, extname } from 'path';
 import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
-import processRaster from '../lib/processRaster.js';
-import processVector from '../lib/processVector.js';
+import minifySvg from '../lib/minifySvg.js';
+import processSquoosh from '../lib/processSquoosh.js';
 import { readFile } from 'fs/promises';
 
 const LOG_TITLE = 'Squoosh';
@@ -21,9 +21,9 @@ const createImage = async (entries, i) => {
 
 	try {
 		if (fileName.endsWith('.svg')) {
-			await processVector(file, fileName);
+			await minifySvg(file, fileName);
 		} else {
-			await processRaster(file, fileName);
+			await processSquoosh(file, fileName);
 		}
 
 		log.success(`<< ${entry} successfully optimized`, LOG_TITLE);

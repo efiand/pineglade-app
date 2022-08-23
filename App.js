@@ -1,5 +1,6 @@
-import { Pattern, appName, isLint, isSelf, isTest } from './constants.js';
+import { Pattern, appName, isBuild, isLint, isSelf, isTest } from './constants.js';
 import buildScripts from './tasks/buildScripts.js';
+import buildSprite from './tasks/buildSprite.js';
 import buildStyles from './tasks/buildStyles.js';
 import createImages from './tasks/createImages.js';
 import getConfig from './tasks/getConfig.js';
@@ -17,14 +18,18 @@ export default class App {
 		await Promise.all([
 			buildScripts(Pattern.JS_CLIENT),
 			buildStyles(Pattern.CSS_ENTRIES, this.config.postcss),
-			createImages(Pattern.IMAGES_PLACE)
+			createImages(Pattern.IMAGES_PLACE),
+			buildSprite(Pattern.ICONS)
 		]);
 	}
 
 	async #test() {
 		await buildScripts(Pattern.JS_SERVER, true);
 		this.config = await getConfig();
-		await processPages(this.config);
+
+		if (isBuild || isTest) {
+			await processPages(this.config);
+		}
 	}
 
 	async run() {
