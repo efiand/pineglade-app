@@ -2,7 +2,6 @@ import {
 	Pattern,
 	appName,
 	isBuild,
-	isDev,
 	isLint,
 	isSelf,
 	isTest
@@ -12,10 +11,12 @@ import buildSprite from './tasks/buildSprite.js';
 import buildStyles from './tasks/buildStyles.js';
 import copyFiles from './tasks/copyFiles.js';
 import createImages from './tasks/createImages.js';
+import { deleteAsync } from 'del';
 import getConfig from './tasks/getConfig.js';
 import lint from './tasks/lint.js';
 import log from './lib/log.js';
 import processPages from './tasks/processPages.js';
+import watch from './tasks/watch.js';
 
 const START_MESSAGE =
 	'>> Starting... See https://github.com/efiand/pineglade-app';
@@ -33,12 +34,18 @@ export default class App {
 	}
 
 	async #dev() {
-		if (isDev && this.config.devScript) {
+		if (this.config.devScript) {
 			await copyFiles(Pattern.PIXELPERFECT);
 		}
+
+		watch(this.config);
 	}
 
 	async #test() {
+		if (!isTest) {
+			await deleteAsync(Pattern.PREPARE);
+		}
+
 		this.config = await getConfig();
 
 		if (isBuild || isTest || !this.config.server) {

@@ -37,16 +37,18 @@ export const Pattern = {
 		'!**/*.{avif,ico,jpg,png,webp,woff,woff2}',
 		'!public/**/*.html'
 	],
+	ENGINE: ['**/*.{js,html,svelte}', '!public/**/*'],
 	HTML: ['source/components/pages/**/*.svelte'],
 	ICONS: 'source/icons/**/*.svg',
 	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
 	JS: ['*.js', '**/*.{js,svelte}'],
-	JS_CLIENT: ['source/scripts/*.js', 'source/components/Page.svelte'],
+	JS_CLIENT: 'source/scripts/*.js',
 	JS_DEV: 'source/scripts/dev.js',
 	JS_SERVER: 'source/components/Page.svelte',
 	LAYOUT: 'source/layout.html',
 	MD: ['**/*.md'],
 	PIXELPERFECT: ['source/pixelperfect/**/*.{jpg,png,svg,webp}'],
+	PREPARE: ['.app', 'public/scripts', 'public/styles', 'public/**/*.bundle.*'],
 	SOURCE: 'source',
 	SSR_BUNDLE: '.app/ssr.bundle.js'
 };
