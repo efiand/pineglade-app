@@ -1,9 +1,16 @@
-import getPathsFromGlobs from './getPathsFromGlobs.js';
-import log from './log.js';
+import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
+import log from '../lib/log.js';
 import markdownlint from 'markdownlint';
 
+const LOG_TITLE = 'Markdownlint';
+
 export default async (globs) => {
+	log.info('>> Checking markdown files...', LOG_TITLE);
+
 	const files = await getPathsFromGlobs(globs);
+	if (!files.length) {
+		return;
+	}
 
 	markdownlint(
 		{
@@ -29,7 +36,10 @@ export default async (globs) => {
 				}
 			});
 
-			log.items(errorData, 'Markdownlint');
+			if (Object.keys(errorData).length) {
+				return log.items(errorData, LOG_TITLE);
+			}
+			log.success('<< Markdown files successfully checked.', LOG_TITLE);
 		}
 	);
 };

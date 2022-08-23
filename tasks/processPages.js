@@ -1,14 +1,17 @@
-import { Dest, isBuilder } from '../constants.js';
-import createHtml from './createHtml.js';
-import log from './log.js';
-import writeFileSmart from './writeFileSmart.js';
+import { Dest, isBuild } from '../constants.js';
+import createHtml from '../lib/createHtml.js';
+import log from '../lib/log.js';
+import writeFileSmart from '../lib/writeFileSmart.js';
 
 const LOG_TITLE = 'Svelte';
 
 export default async ({ layout, props, routes, ssrBundle }) => {
-	if (isBuilder) {
-		log.info('>> Building pages begins...', LOG_TITLE);
+	if (!routes.length) {
+		return;
 	}
+
+	log.info(`>> ${isBuild ? 'Building' : 'Testing'} HTML pages...`, LOG_TITLE);
+
 	try {
 		await Promise.all(
 			routes
@@ -21,15 +24,17 @@ export default async ({ layout, props, routes, ssrBundle }) => {
 						url,
 						validate: true
 					}).then(async (content) => {
-						if (isBuilder) {
+						if (isBuild) {
 							await writeFileSmart(`${Dest.MAIN}${url}`, content);
 						}
 					});
 				})
 		);
-		if (isBuilder) {
-			log.success('<< Pages successfully builded.', LOG_TITLE);
-		}
+
+		log.success(
+			`<< HTML pages successfully ${isBuild ? 'builded' : 'tested'}.`,
+			LOG_TITLE
+		);
 	} catch (err) {
 		log.error(err, LOG_TITLE);
 	}

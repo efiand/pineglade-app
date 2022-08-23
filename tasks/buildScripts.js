@@ -2,12 +2,12 @@ import {
 	CWD,
 	Dest,
 	Pattern,
-	isWatcher as dev,
+	isDev as dev,
 	terserOptions
 } from '../constants.js';
 import TerserPlugin from 'terser-webpack-plugin';
-import getPathsFromGlobs from './getPathsFromGlobs.js';
-import log from './log.js';
+import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
+import log from '../lib/log.js';
 import path from 'path';
 import webpack from 'webpack';
 
@@ -94,13 +94,13 @@ const createEntryConfig = (entry) => {
 };
 
 export default async (globs, silent = false) => {
+	if (!silent) {
+		log.info('>> Building scripts...', LOG_TITLE);
+	}
+
 	const files = await getPathsFromGlobs(globs);
 	if (!files.length) {
 		return;
-	}
-
-	if (!silent) {
-		log.info('>> Building scripts begins...', LOG_TITLE);
 	}
 
 	return await new Promise((resolve, reject) => {

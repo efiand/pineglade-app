@@ -1,16 +1,7 @@
-import BuilderApp from './app/BuilderApp.js';
-import LinterApp from './app/LinterApp.js';
-import WatcherApp from './app/WatcherApp.js';
-import { script } from './constants.js';
-
-const appByScript = {
-	builder: BuilderApp,
-	linter: LinterApp,
-	watcher: WatcherApp
-};
+import App from './App.js';
 
 (async () => {
-	const app = new appByScript[script]();
+	const app = new App();
 
 	await app.run();
 })();

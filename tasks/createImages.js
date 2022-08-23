@@ -1,8 +1,8 @@
 import { basename, extname } from 'path';
-import getPathsFromGlobs from './getPathsFromGlobs.js';
-import log from './log.js';
-import processRaster from './processRaster.js';
-import processVector from './processVector.js';
+import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
+import log from '../lib/log.js';
+import processRaster from '../lib/processRaster.js';
+import processVector from '../lib/processVector.js';
 import { readFile } from 'fs/promises';
 
 const LOG_TITLE = 'Squoosh';
@@ -12,7 +12,7 @@ const createImage = async (entries, i) => {
 		return;
 	}
 	const entry = entries[i];
-	log.info(`>> Optimize ${entry}...`, LOG_TITLE);
+	log.info(`>> Optimizing image ${entry}...`, LOG_TITLE);
 
 	const extName = extname(entry);
 	const isSvg = extName === '.svg';
@@ -26,7 +26,7 @@ const createImage = async (entries, i) => {
 			await processRaster(file, fileName);
 		}
 
-		log.success(`<< Success ${entry}`, LOG_TITLE);
+		log.success(`<< ${entry} successfully optimized`, LOG_TITLE);
 
 		await createImage(entries, i + 1);
 	} catch (err) {

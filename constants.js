@@ -1,10 +1,14 @@
 import { resolve } from 'path';
 
+export const appName = 'PinegladeApp';
+
 export const [, appPath, script = 'linter'] = process.argv;
 export const CWD = process.cwd();
 export const isSelf = CWD === appPath;
-export const isBuilder = script === 'builder';
-export const isWatcher = script === 'watcher';
+export const isLint = script === 'lint';
+export const isTest = script === 'test';
+export const isBuild = script === 'build';
+export const isDev = script === 'dev';
 
 export const DEFAUT_PORT = 1993;
 export const port = process.env.PORT || DEFAUT_PORT;
@@ -23,6 +27,7 @@ export const HttpMethod = {
 };
 
 export const Pattern = {
+	APP_CONFIG: 'app.config.js',
 	CSS: 'source/styles/**/*.css',
 	CSS_ENTRIES: 'source/styles/*.css',
 	DEFAULT_IGNORES: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
@@ -37,6 +42,7 @@ export const Pattern = {
 	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
 	JS: ['*.js', '**/*.{js,svelte}'],
 	JS_CLIENT: ['source/scripts/*.js', 'source/components/Page.svelte'],
+	JS_DEV: ['source/scripts/dev.js'],
 	JS_SERVER: 'source/components/Page.svelte',
 	LAYOUT: 'source/layout.html',
 	MD: ['**/*.md'],
