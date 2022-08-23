@@ -1,22 +1,25 @@
-import { basename, extname } from 'path';
+import { deleteAsync } from 'del';
 import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import minifySvg from '../lib/minifySvg.js';
+import path from 'path';
 import processSquoosh from '../lib/processSquoosh.js';
 import { readFile } from 'fs/promises';
 
-const LOG_TITLE = 'Squoosh';
-
-const createImage = async (entries, i) => {
+const createImage = async (entries, i, del) => {
 	if (i === entries.length) {
 		return;
 	}
-	const entry = entries[i];
-	log.info(`>> Optimizing image ${entry}...`, LOG_TITLE);
 
-	const extName = extname(entry);
+	const entry = entries[i];
+	const entryName = path.basename(entry);
+	const extName = path.extname(entry);
 	const isSvg = extName === '.svg';
-	const fileName = isSvg ? basename(entry) : basename(entry, extName);
+	const logTItle = isSvg ? 'SVGO' : 'Squoosh';
+
+	log.info(`>> Optimizing ${entryName}...`, logTItle);
+
+	const fileName = isSvg ? entryName : path.basename(entry, extName);
 	const file = await (isSvg ? readFile(entry, 'utf-8') : readFile(entry));
 
 	try {
@@ -26,20 +29,24 @@ const createImage = async (entries, i) => {
 			await processSquoosh(file, fileName);
 		}
 
-		log.success(`<< ${entry} successfully optimized`, LOG_TITLE);
+		if (del) {
+			await deleteAsync(entry);
+		}
 
-		await createImage(entries, i + 1);
+		log.success(`<< ${entryName} successfully optimized.`, logTItle);
+
+		await createImage(entries, i + 1, del);
 	} catch (err) {
-		return log.error(err, LOG_TITLE);
+		return log.error(err, logTItle);
 	}
 };
 
-export default async (globs) => {
+export default async (globs, del = false) => {
 	const files = await getPathsFromGlobs(globs);
 	if (!files.length) {
 		return;
 	}
 
 	// Sequential processing to prevent pools from gobbling up memory.
-	return await createImage(globs, 0);
+	return await createImage(files, 0, del);
 };

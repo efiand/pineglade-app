@@ -18,7 +18,7 @@ export default class App {
 		await Promise.all([
 			buildScripts(Pattern.JS_CLIENT),
 			buildStyles(Pattern.CSS_ENTRIES, this.config.postcss),
-			createImages(Pattern.IMAGES_PLACE),
+			createImages(Pattern.IMAGES_PLACE, true),
 			buildSprite(Pattern.ICONS)
 		]);
 	}
