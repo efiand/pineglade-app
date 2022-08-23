@@ -1,7 +1,16 @@
-import { Pattern, appName, isBuild, isLint, isSelf, isTest } from './constants.js';
+import {
+	Pattern,
+	appName,
+	isBuild,
+	isDev,
+	isLint,
+	isSelf,
+	isTest
+} from './constants.js';
 import buildScripts from './tasks/buildScripts.js';
 import buildSprite from './tasks/buildSprite.js';
 import buildStyles from './tasks/buildStyles.js';
+import copyFiles from './tasks/copyFiles.js';
 import createImages from './tasks/createImages.js';
 import getConfig from './tasks/getConfig.js';
 import lint from './tasks/lint.js';
@@ -12,7 +21,7 @@ const START_MESSAGE =
 	'>> Starting... See https://github.com/efiand/pineglade-app';
 
 export default class App {
-	config;
+	config = {};
 
 	async #build() {
 		await Promise.all([
@@ -23,11 +32,16 @@ export default class App {
 		]);
 	}
 
+	async #dev() {
+		if (isDev && this.config.devScript) {
+			await copyFiles(Pattern.PIXELPERFECT);
+		}
+	}
+
 	async #test() {
-		await buildScripts(Pattern.JS_SERVER, true);
 		this.config = await getConfig();
 
-		if (isBuild || isTest) {
+		if (isBuild || isTest || !this.config.server) {
 			await processPages(this.config);
 		}
 	}
@@ -51,6 +65,11 @@ export default class App {
 			}
 
 			await this.#build();
+			if (isBuild) {
+				return;
+			}
+
+			await this.#dev();
 		} catch (err) {
 			log.error(err, appName);
 		}

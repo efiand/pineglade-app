@@ -1,4 +1,5 @@
 import { Pattern, isDev } from '../constants.js';
+import buildScripts from './buildScripts.js';
 import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import { mapSvelteRoute } from '../lib/routes.js';
@@ -9,7 +10,8 @@ const LOG_TITLE = 'Config';
 const DEFAUT_CONFIG = {
 	postcss: {},
 	props: {},
-	routes: []
+	routes: [],
+	server: false
 };
 
 const getNecessary = async (pattern, type = 'text') => {
@@ -31,7 +33,6 @@ export default async () => {
 	}
 
 	const config = { ...DEFAUT_CONFIG, ...userConfig };
-	config.layout = await getNecessary(Pattern.LAYOUT);
 
 	if (isDev && !config.devScript) {
 		const hasDevScript = await readFileSmart(Pattern.JS_DEV);
@@ -51,6 +52,10 @@ export default async () => {
 		}
 	}
 
+	config.layout = await getNecessary(Pattern.LAYOUT);
+
+	await buildScripts(Pattern.JS_SERVER, true);
 	config.ssrBundle = await getNecessary(Pattern.SSR_BUNDLE, 'import');
+
 	return config;
 };
