@@ -25,7 +25,6 @@ import watch from './tasks/watch.js';
 
 const START_MESSAGE =
 	'>> Starting... See https://github.com/efiand/pineglade-app';
-const DELETE_ON_START = ['.app', '**/*.bundle.*'];
 const DEV_SCRIPT = 'source/scripts/dev.js';
 
 const globConfig = {
@@ -35,9 +34,11 @@ const globConfig = {
 };
 
 const selfFilesPattern = '{lib/,tasks/,tools/,A,R,c,i}*.{js,md}';
-const appFilesPattern = 'source/**/*.{css,html,jpg,js,json,md,png,svelte,svg,webp}';
+const appFilesPattern =
+	'source/**/*.{css,html,jpg,js,json,md,png,svelte,svg,webp}';
 const filesPattern = isSelf ? selfFilesPattern : appFilesPattern;
 const typePaterns = Object.entries(TypePattern);
+const deleteOnStart = ['.app', '**/*.bundle.*'];
 
 export default class App {
 	config = {
@@ -63,7 +64,10 @@ export default class App {
 	unstateFile = this.#unstateFile.bind(this);
 
 	async #build() {
-		await deleteAsync(DELETE_ON_START);
+		if (this.config.routes.length) {
+			deleteOnStart.push('public/**/*.html');
+		}
+		await deleteAsync(deleteOnStart);
 
 		await Promise.all([
 			buildScripts(this.files.scriptEntries),
