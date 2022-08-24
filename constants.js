@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-export const appName = 'PinegladeApp';
+export const APP_NAME = 'PinegladeApp';
 
 export const [, appPath, script = 'start'] = process.argv;
 export const CWD = process.cwd();
@@ -45,7 +45,7 @@ export const TypePattern = {
 	scriptEntries: /scripts(?!.+\/).+\.js$/,
 	scripts: /.+\.(js|svelte)$/,
 	sources: /\.(css|html|js|json|md|svelte|svg)$/,
-	ssrEntries: /components\/Body\.svelte$/,
+	ssrEntries: /components\/Page\.svelte$/,
 	styleEntries: /styles\/(?!.+\/).+\.css$/,
 	styles: /styles\/.+\.css$/
 };

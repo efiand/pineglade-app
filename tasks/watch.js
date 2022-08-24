@@ -1,4 +1,4 @@
-import { Dest, host } from '../constants.js';
+import { CWD, host as proxy } from '../constants.js';
 import browserSync from 'browser-sync';
 import buildScripts from './buildScripts.js';
 import buildSprite from './buildSprite.js';
@@ -9,32 +9,23 @@ import lintMarkdown from './lintMarkdown.js';
 import lintScripts from './lintScripts.js';
 import lintSpaces from './lintSpaces.js';
 import lintStyles from './lintStyles.js';
-import nodemon from 'nodemon';
-import processPages from './processPages.js';
+import path from 'path';
 
 const devServer = browserSync.create();
-let isInit = false;
-
-const rebuild = async (_file, files, config) => {
-	if (config.routes) {
-		await buildScripts(files.ssrEntries, true);
-		if (!config.server) {
-			await processPages(config);
-		}
-	}
-	return devServer.reload();
-};
 
 const typeHandlers = {
-	async icons(file, files) {
+	async icons(file, { files }) {
 		await buildSprite(files.icons);
 		return devServer.reload();
 	},
-	layouts: rebuild,
+	async layouts(file, { processHtml }) {
+		await processHtml();
+		return devServer.reload();
+	},
 	markdowns(file) {
 		lintMarkdown([file]);
 	},
-	async pixelperfectImages(file, files) {
+	async pixelperfectImages(file, { files }) {
 		await copyFiles(files.pixelperfectImages);
 		return devServer.reload();
 	},
@@ -42,19 +33,27 @@ const typeHandlers = {
 		await createImages([file], true);
 		return devServer.reload();
 	},
-	async scripts(file, files, config) {
-		await Promise.all([lintScripts([file]), buildScripts(files.scriptEntries)]);
-		return await rebuild(file, files, config);
+	async scripts(file, { files, processHtml }) {
+		await Promise.all([
+			lintScripts([file]),
+			buildScripts(files.scriptEntries),
+			processHtml()
+		]);
+		return devServer.reload();
 	},
-	sources: lintSpaces,
-	async styles(file, files) {
+	sources(file) {
+		lintSpaces([file]);
+	},
+	async styles(file, { files }) {
 		await Promise.all([lintStyles([file]), buildStyles(files.styleEntries)]);
 		return devServer.reload();
 	}
 };
 
-const watchFile = ({ config, files, stateFile, unstateFile }) => {
+const watchFile = ({ config, files, processHtml, stateFile, unstateFile }) => {
 	return async (evt, file) => {
+		file = path.resolve(CWD, file).replace(/\\/g, '/');
+
 		if (evt === 'addDir' || evt === 'unlinkDir') {
 			return;
 		}
@@ -65,55 +64,30 @@ const watchFile = ({ config, files, stateFile, unstateFile }) => {
 			stateFile(file);
 		}
 
-		let promise = null;
-		for (const type of Object.keys(files)) {
-			if (typeHandlers[type] && files[type].includes(file)) {
-				promise = typeHandlers[type];
-			}
-		}
-		return await promise(file, files, config);
+		return await Promise.all(
+			Object.keys(files)
+				.map((type) => {
+					if (typeHandlers[type] && files[type].includes(file)) {
+						return typeHandlers[type](file, { config, files, processHtml });
+					}
+					return null;
+				})
+				.filter(Boolean)
+		);
 	};
 };
 
-const startServer = (app) => {
-	if (isInit) {
-		return;
-	}
-
-	const serverOptions = {
+export default (app) => {
+	devServer.init({
 		cors: true,
 		files: [
-			{
-				match: '.app/restart.log'
-			},
 			{
 				fn: watchFile(app),
 				match: 'source/**/*'
 			}
 		],
 		open: false,
+		proxy,
 		ui: false
-	};
-
-	if (app.config.server) {
-		serverOptions.proxy = host;
-	} else {
-		serverOptions.server = Dest.MAIN;
-	}
-
-	devServer.init(serverOptions);
-
-	isInit = true;
-};
-
-export default (app) => {
-	if (app.config.server) {
-		return nodemon({
-			ext: 'js',
-			script: './app',
-			watch: ['app']
-		}).on('start', () => startServer(app));
-	}
-
-	startServer(app);
+	});
 };

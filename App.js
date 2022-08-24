@@ -1,6 +1,7 @@
 import {
+	APP_NAME,
+	Dest,
 	TypePattern,
-	appName,
 	isBuild,
 	isDev,
 	isLint,
@@ -21,11 +22,13 @@ import log from './lib/log.js';
 import { mapSvelteRoute } from './lib/routes.js';
 import processPages from './tasks/processPages.js';
 import readFileSmart from './lib/readFileSmart.js';
+import startServer from './tasks/startServer.js';
 import watch from './tasks/watch.js';
 
 const START_MESSAGE =
 	'>> Starting... See https://github.com/efiand/pineglade-app';
 const DEV_SCRIPT = 'source/scripts/dev.js';
+const DELETE_ON_START = ['**/*.bundle.*', 'public/pixelperfect'];
 
 const globConfig = {
 	mark: true,
@@ -38,18 +41,21 @@ const appFilesPattern =
 	'source/**/*.{css,html,jpg,js,json,md,png,svelte,svg,webp}';
 const filesPattern = isSelf ? selfFilesPattern : appFilesPattern;
 const typePaterns = Object.entries(TypePattern);
-const deleteOnStart = ['.app', '**/*.bundle.*'];
+const ssrBundleDest = `${Dest.APP_OUTPUT}/${Dest.SSR_BUNDLE_NAME}`;
+
+const defaultConfig = {
+	devScript: null,
+	indexUrl: '/index.html',
+	layout: null,
+	notFoundUrl: '/404.html',
+	postcss: {},
+	props: {},
+	routes: [],
+	ssrBundle: null
+};
 
 export default class App {
-	config = {
-		devScript: null,
-		layout: null,
-		postcss: {},
-		props: {},
-		routes: [],
-		server: false,
-		ssrBundle: null
-	};
+	config = defaultConfig;
 
 	files = typePaterns.reduce(
 		(obj, [key]) => ({
@@ -59,15 +65,35 @@ export default class App {
 		{}
 	);
 
-	stateFile = this.#stateFile.bind(this);
+	constructor() {
+		this.started = false;
 
-	unstateFile = this.#unstateFile.bind(this);
+		this.processHtml = this.#processHtml.bind(this);
+		this.stateFile = this.#stateFile.bind(this);
+		this.unstateFile = this.#unstateFile.bind(this);
+	}
+
+	#addRoutes() {
+		this.config.routes = this.files.routeEntries.map(mapSvelteRoute(this));
+
+		const rootRoute = this.config.routes.find(({ url }) => url === '/');
+
+		if (!rootRoute) {
+			const indexRoute = this.config.routes.find(
+				({ url }) => url === this.config.indexUrl
+			);
+			if (indexRoute) {
+				this.config.routes.push({
+					...indexRoute,
+					generate: false,
+					url: '/'
+				});
+			}
+		}
+	}
 
 	async #build() {
-		if (this.config.routes.length) {
-			deleteOnStart.push('public/**/*.html');
-		}
-		await deleteAsync(deleteOnStart);
+		await deleteAsync(DELETE_ON_START);
 
 		await Promise.all([
 			buildScripts(this.files.scriptEntries),
@@ -79,40 +105,38 @@ export default class App {
 
 	async #configure() {
 		if (this.files.configs.length) {
-			const config = await readFileSmart(this.files.configs[0], 'import', {});
+			const config = await readFileSmart(
+				`${this.files.configs[0]}?${Date.now()}`,
+				'import',
+				{}
+			);
 			this.config = {
-				...this.config,
+				...defaultConfig,
 				...config
 			};
 		}
 
 		if (!this.config.routes.length) {
 			if (this.files.routeEntries.length) {
-				this.config.routes = this.files.routeEntries.map(mapSvelteRoute);
+				this.#addRoutes();
 			} else {
-				return;
+				return log.warn(
+					'No routes. Do you use static HTML in public folder?',
+					APP_NAME
+				);
 			}
 		}
 
-		if (this.files.ssrEntries.length && this.files.layouts.length) {
-			await buildScripts(this.files.ssrEntries, true);
+		if (!this.files.layouts.length) {
+			return;
+		}
+		this.config.layout = await readFileSmart(this.files.layouts[0]);
 
-			const [layout, ssrBundle] = Promise.all([
-				readFileSmart(this.files.ssrEntries[0], 'import'),
-				readFileSmart(this.files.layouts[0])
-			]);
-
-			if (layout && ssrBundle) {
-				this.config.layout = layout;
-				this.config.ssrBundle = ssrBundle;
-
-				const hasDevScript = Boolean(
-					this.files.scriptEntries.find((entry) => entry.endsWith(DEV_SCRIPT))
-				);
-				if (isDev && !this.config.devScript && hasDevScript) {
-					this.config.devScript = DEV_SCRIPT;
-				}
-			}
+		const hasDevScript = Boolean(
+			this.files.scriptEntries.find((entry) => entry.endsWith(DEV_SCRIPT))
+		);
+		if (isDev && this.config.layout && !this.config.devScript && hasDevScript) {
+			this.config.devScript = DEV_SCRIPT;
 		}
 	}
 
@@ -140,11 +164,26 @@ export default class App {
 	}
 
 	async #processHtml() {
-		if (!this.config.routes) {
-			return;
+		await this.#configure();
+
+		if (!this.config.layout) {
+			return log.warn(
+				'No layout. Do you use static HTML in public folder?',
+				APP_NAME
+			);
 		}
 
-		await processPages(this.config);
+		if (this.config.routes.length && !this.started) {
+			await deleteAsync([ssrBundleDest, 'public/**/*.html']);
+		}
+
+		await buildScripts(this.files.ssrEntries, true);
+
+		this.config.ssrBundle = await readFileSmart(ssrBundleDest, 'import');
+
+		if (!isDev) {
+			await processPages(this.config);
+		}
 	}
 
 	#stateFile(file) {
@@ -171,17 +210,16 @@ export default class App {
 	}
 
 	async run() {
-		log.info(START_MESSAGE, appName);
+		log.info(START_MESSAGE, APP_NAME);
 
 		try {
 			await this.#fillFiles();
 
 			if (isSelf) {
-				log.warn('Self-test mode.', appName);
+				log.warn('Self-test mode.', APP_NAME);
 			}
 
-			await Promise.all([this.#lint(), this.#configure()]);
-			await this.#processHtml();
+			await Promise.all([this.#lint(), this.#processHtml()]);
 			if (isLint) {
 				return;
 			}
@@ -191,13 +229,18 @@ export default class App {
 				return;
 			}
 
+			await startServer(this);
+			this.started = true;
+			if (!isDev) {
+				return;
+			}
+
 			if (this.config.devScript) {
 				await copyFiles(this.files.pixelperfectImages);
 			}
-
 			watch(this);
 		} catch (err) {
-			log.error(err, appName);
+			log.error(err, APP_NAME);
 		}
 	}
 }

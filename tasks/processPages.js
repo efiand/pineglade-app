@@ -1,16 +1,12 @@
-import { Dest, isBuild } from '../constants.js';
+import { Dest, isBuild, isLint } from '../constants.js';
 import createHtml from '../lib/createHtml.js';
 import log from '../lib/log.js';
 import writeFileSmart from '../lib/writeFileSmart.js';
 
 const LOG_TITLE = 'Svelte';
 
-export default async ({ layout, props, routes, server, ssrBundle }) => {
-	if (server || !layout || !routes.length || !ssrBundle) {
-		return;
-	}
-
-	log.info(`>> ${isBuild ? 'Building' : 'Testing'} HTML pages...`, LOG_TITLE);
+export default async ({ layout, props, routes, ssrBundle }) => {
+	log.info(`>> ${isLint ? 'Testing' : 'Building'} HTML pages...`, LOG_TITLE);
 
 	try {
 		await Promise.all(
@@ -32,7 +28,7 @@ export default async ({ layout, props, routes, server, ssrBundle }) => {
 		);
 
 		log.success(
-			`<< HTML pages successfully ${isBuild ? 'builded' : 'tested'}.`,
+			`<< HTML pages successfully ${isLint ? 'tested' : 'builded'}.`,
 			LOG_TITLE
 		);
 	} catch (err) {

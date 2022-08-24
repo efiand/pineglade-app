@@ -19,10 +19,7 @@ const configure = async () => {
 			return userConfig;
 		}
 
-		log.warn(
-			'There is no eslint configuration, the built-in will be used.',
-			LOG_TITLE
-		);
+		log.warn('No eslint configuration, the built-in will be used.', LOG_TITLE);
 		return eslintConfig;
 	});
 

@@ -20,7 +20,7 @@ const configure = async () => {
 		}
 
 		log.warn(
-			'There is no stylelint configuration, the built-in will be used.',
+			'No stylelint configuration, the built-in will be used.',
 			LOG_TITLE
 		);
 		return stylelintConfig;
