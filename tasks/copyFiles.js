@@ -1,13 +1,11 @@
 import { Dest } from '../constants.js';
 import { cp } from 'fs/promises';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import path from 'path';
 
 const LOG_TITLE = 'Copy';
 
-export default async (globs) => {
-	const files = await getPathsFromGlobs(globs);
+export default async (files) => {
 	if (!files.length) {
 		return;
 	}

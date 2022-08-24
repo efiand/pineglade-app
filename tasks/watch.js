@@ -1,4 +1,4 @@
-import { Dest, Pattern, host } from '../constants.js';
+import { Dest, host } from '../constants.js';
 import browserSync from 'browser-sync';
 import buildScripts from './buildScripts.js';
 import buildSprite from './buildSprite.js';
@@ -15,112 +15,87 @@ import processPages from './processPages.js';
 const devServer = browserSync.create();
 let isInit = false;
 
-const initialWatchers = [
-	{
-		async fn() {
-			await lintSpaces(Pattern.EDITORCONFIG);
-		},
-		match: Pattern.EDITORCONFIG
-	},
-	{
-		async fn() {
-			await lintMarkdown(Pattern.MD);
-		},
-		match: Pattern.MD
-	},
-	{
-		async fn() {
-			await lintStyles(Pattern.CSS);
-		},
-		match: Pattern.CSS
-	},
-	{
-		async fn() {
-			await lintScripts(Pattern.JS);
-		},
-		match: Pattern.JS
-	},
-	{
-		async fn() {
-			await buildStyles(Pattern.CSS_ENTRIES);
-			devServer.reload();
-		},
-		match: Pattern.CSS_ENTRIES
-	},
-	{
-		async fn() {
-			await copyFiles(Pattern.PIXELPERFECT);
-			devServer.reload();
-		},
-		match: Pattern.PIXELPERFECT
-	},
-	{
-		async fn(evt) {
-			if (evt === 'unlink') {
-				return;
-			}
-
-			await createImages(Pattern.IMAGES_PLACE, true);
-			devServer.reload();
-		},
-		match: Pattern.IMAGES_PLACE
-	},
-	{
-		async fn() {
-			await buildSprite(Pattern.ICONS);
-			devServer.reload();
-		},
-		match: Pattern.ICONS
+const rebuild = async (_file, files, config) => {
+	if (config.routes) {
+		await buildScripts(files.ssrEntries, true);
+		if (!config.server) {
+			await processPages(config);
+		}
 	}
-];
-
-const getWatchers = (config) => {
-	const watchers = [...initialWatchers];
-
-	if (config.server) {
-		watchers.push({
-			match: '.app/restart.log'
-		});
-	}
-
-	if (config.layout) {
-		watchers.push({
-			async fn() {
-				await buildScripts([Pattern.JS_SERVER, Pattern.JS_CLIENT]);
-				await processPages(Pattern.HTML);
-				devServer.reload();
-			},
-			match: [Pattern.APP_CONFIG, ...Pattern.ENGINE]
-		});
-	} else {
-		watchers.push({
-			match: `${Dest.MAIN}/**/*.html`
-		});
-		watchers.push({
-			async fn() {
-				await buildScripts(Pattern.JS_CLIENT);
-				devServer.reload();
-			},
-			match: Pattern.JS_CLIENT
-		});
-	}
-
-	return watchers;
+	return devServer.reload();
 };
 
-const startServer = (config) => {
+const typeHandlers = {
+	async icons(file, files) {
+		await buildSprite(files.icons);
+		return devServer.reload();
+	},
+	layouts: rebuild,
+	markdowns(file) {
+		lintMarkdown([file]);
+	},
+	async pixelperfectImages(file, files) {
+		await copyFiles(files.pixelperfectImages);
+		return devServer.reload();
+	},
+	async rawImages(file) {
+		await createImages([file], true);
+		return devServer.reload();
+	},
+	async scripts(file, files, config) {
+		await Promise.all([lintScripts([file]), buildScripts(files.scriptEntries)]);
+		return await rebuild(file, files, config);
+	},
+	sources: lintSpaces,
+	async styles(file, files) {
+		await Promise.all([lintStyles([file]), buildStyles(files.styleEntries)]);
+		return devServer.reload();
+	}
+};
+
+const watchFile = ({ config, files, stateFile, unstateFile }) => {
+	return async (evt, file) => {
+		if (evt === 'addDir' || evt === 'unlinkDir') {
+			return;
+		}
+		if (evt === 'unlink') {
+			return unstateFile(file);
+		}
+		if (evt === 'add') {
+			stateFile(file);
+		}
+
+		let promise = null;
+		for (const type of Object.keys(files)) {
+			if (typeHandlers[type] && files[type].includes(file)) {
+				promise = typeHandlers[type];
+			}
+		}
+		return await promise(file, files, config);
+	};
+};
+
+const startServer = (app) => {
 	if (isInit) {
 		return;
 	}
 
 	const serverOptions = {
 		cors: true,
-		files: getWatchers(config),
+		files: [
+			{
+				match: '.app/restart.log'
+			},
+			{
+				fn: watchFile(app),
+				match: 'source/**/*'
+			}
+		],
 		open: false,
 		ui: false
 	};
 
-	if (config.server) {
+	if (app.config.server) {
 		serverOptions.proxy = host;
 	} else {
 		serverOptions.server = Dest.MAIN;
@@ -131,14 +106,14 @@ const startServer = (config) => {
 	isInit = true;
 };
 
-export default (config) => {
-	if (config.server) {
+export default (app) => {
+	if (app.config.server) {
 		return nodemon({
 			ext: 'js',
 			script: './app',
 			watch: ['app']
-		}).on('start', () => startServer(config));
+		}).on('start', () => startServer(app));
 	}
 
-	startServer(config);
+	startServer(app);
 };

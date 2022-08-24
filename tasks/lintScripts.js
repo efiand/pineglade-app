@@ -28,18 +28,19 @@ const configure = async () => {
 
 	eslint = new ESLint({
 		allowInlineConfig: false,
-		baseConfig
+		baseConfig,
+		globInputPaths: false
 	});
 };
 
-export default async (globs) => {
+export default async (files) => {
 	log.info('>> Checking scripts...', LOG_TITLE);
 
 	if (!eslint) {
 		await configure();
 	}
 
-	const results = await eslint.lintFiles(globs);
+	const results = await eslint.lintFiles(files);
 	const formatter = await eslint.loadFormatter('stylish');
 
 	if (results.filter(({ messages }) => messages.length).length) {

@@ -6,7 +6,6 @@ export const [, appPath, script = 'start'] = process.argv;
 export const CWD = process.cwd();
 export const isSelf = CWD === appPath;
 export const isLint = script === 'lint';
-export const isTest = script === 'test';
 export const isBuild = script === 'build';
 export const isDev = script === 'dev';
 
@@ -26,33 +25,6 @@ export const HttpMethod = {
 	PUT: 'PUT'
 };
 
-export const Pattern = {
-	APP_CONFIG: 'app.config.js',
-	CSS: 'source/styles/**/*.css',
-	CSS_ENTRIES: 'source/styles/*.css',
-	DEFAULT_IGNORES: ['**/*.bundle.*', '*lock*', 'node_modules/**/*'],
-	EDITORCONFIG: [
-		'.*',
-		'**/*',
-		'!**/*.{avif,ico,jpg,png,webp,woff,woff2}',
-		'!public/**/*.html'
-	],
-	ENGINE: ['**/*.{js,html,svelte}', '!public/**/*'],
-	HTML: ['source/components/pages/**/*.svelte'],
-	ICONS: 'source/icons/**/*.svg',
-	IMAGES_PLACE: 'source/place/**/*.{jpg,png,svg}',
-	JS: ['*.js', '**/*.{js,svelte}'],
-	JS_CLIENT: 'source/scripts/*.js',
-	JS_DEV: 'source/scripts/dev.js',
-	JS_SERVER: 'source/components/Page.svelte',
-	LAYOUT: 'source/layout.html',
-	MD: ['**/*.md'],
-	PIXELPERFECT: ['source/pixelperfect/**/*.{jpg,png,svg,webp}'],
-	PREPARE: ['.app', 'public/scripts', 'public/styles', 'public/**/*.bundle.*'],
-	SOURCE: 'source',
-	SSR_BUNDLE: '.app/ssr.bundle.js'
-};
-
 export const Dest = {
 	APP_OUTPUT: resolve(CWD, '.app'),
 	CSS: resolve(CWD, 'public/styles'),
@@ -60,6 +32,22 @@ export const Dest = {
 	JS: resolve(CWD, 'public/scripts'),
 	MAIN: resolve(CWD, 'public'),
 	SSR_BUNDLE_NAME: 'ssr.bundle.js'
+};
+
+export const TypePattern = {
+	configs: /app\/config\.js$/,
+	icons: /icons\/.+\.svg$/,
+	layouts: /source\/layout\.html$/,
+	markdowns: /\.md$/,
+	pixelperfectImages: /pixelperfect\/.+\.(jpg|png|svg|webp)$/,
+	rawInages: /place\/.+\.(jpg|png|svg|webp)$/,
+	routeEntries: /pages\/.+\.html\.svelte$/,
+	scriptEntries: /scripts(?!.+\/).+\.js$/,
+	scripts: /.+\.(js|svelte)$/,
+	sources: /\.(css|html|js|json|md|svelte|svg)$/,
+	ssrEntries: /components\/Body\.svelte$/,
+	styleEntries: /styles\/(?!.+\/).+\.css$/,
+	styles: /styles\/.+\.css$/
 };
 
 export const cssnanoOptions = {

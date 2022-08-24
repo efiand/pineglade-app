@@ -1,12 +1,5 @@
-import {
-	CWD,
-	Dest,
-	Pattern,
-	isDev as dev,
-	terserOptions
-} from '../constants.js';
+import { CWD, Dest, isDev as dev, terserOptions } from '../constants.js';
 import TerserPlugin from 'terser-webpack-plugin';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import path from 'path';
 import webpack from 'webpack';
@@ -14,7 +7,7 @@ import webpack from 'webpack';
 const LOG_TITLE = 'Webpack';
 
 const alias = {
-	'@': path.resolve(CWD, Pattern.SOURCE),
+	'@': path.resolve(CWD, 'source'),
 	svelte: path.resolve(CWD, 'node_modules/svelte')
 };
 
@@ -93,14 +86,13 @@ const createEntryConfig = (entry) => {
 	});
 };
 
-export default async (globs, silent = false) => {
-	if (!silent) {
-		log.info('>> Building scripts...', LOG_TITLE);
-	}
-
-	const files = await getPathsFromGlobs(globs);
+export default async (files, silent = false) => {
 	if (!files.length) {
 		return;
+	}
+
+	if (!silent) {
+		log.info('>> Building scripts...', LOG_TITLE);
 	}
 
 	return await new Promise((resolve, reject) => {

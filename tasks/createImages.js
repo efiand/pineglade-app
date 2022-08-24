@@ -1,5 +1,4 @@
 import { deleteAsync } from 'del';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import minifySvg from '../lib/minifySvg.js';
 import path from 'path';
@@ -41,8 +40,7 @@ const createImage = async (entries, i, del) => {
 	}
 };
 
-export default async (globs, del = false) => {
-	const files = await getPathsFromGlobs(globs);
+export default async (files, del = false) => {
 	if (!files.length) {
 		return;
 	}

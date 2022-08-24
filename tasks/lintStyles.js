@@ -28,6 +28,10 @@ const configure = async () => {
 };
 
 export default async (files) => {
+	if (!files.length) {
+		return;
+	}
+
 	log.info('>> Checking styles...', LOG_TITLE);
 
 	if (!config) {

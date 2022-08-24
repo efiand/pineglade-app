@@ -1,16 +1,14 @@
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import markdownlint from 'markdownlint';
 
 const LOG_TITLE = 'Markdownlint';
 
-export default async (globs) => {
-	log.info('>> Checking markdown files...', LOG_TITLE);
-
-	const files = await getPathsFromGlobs(globs);
+export default (files) => {
 	if (!files.length) {
 		return;
 	}
+
+	log.info('>> Checking markdown files...', LOG_TITLE);
 
 	markdownlint(
 		{

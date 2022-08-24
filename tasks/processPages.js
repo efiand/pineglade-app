@@ -5,8 +5,8 @@ import writeFileSmart from '../lib/writeFileSmart.js';
 
 const LOG_TITLE = 'Svelte';
 
-export default async ({ layout, props, routes, ssrBundle }) => {
-	if (!routes.length) {
+export default async ({ layout, props, routes, server, ssrBundle }) => {
+	if (server || !layout || !routes.length || !ssrBundle) {
 		return;
 	}
 

@@ -1,16 +1,14 @@
 import Validator from 'lintspaces';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 
 const LOG_TITLE = 'Lintspaces';
 
-export default async (globs) => {
-	log.info('>> Checking spaces with editorconfig...', LOG_TITLE);
-
-	const files = await getPathsFromGlobs(globs);
+export default (files) => {
 	if (!files.length) {
 		return;
 	}
+
+	log.info('>> Checking spaces with editorconfig...', LOG_TITLE);
 
 	const validator = new Validator({ editorconfig: '.editorconfig' });
 	files.forEach((file) => validator.validate(file));
@@ -26,5 +24,5 @@ export default async (globs) => {
 		return log.items(result, 'Editorconfig');
 	}
 
-	log.success('<< Scripts successfully checked.', LOG_TITLE);
+	log.success('<< Spaces successfully checked.', LOG_TITLE);
 };

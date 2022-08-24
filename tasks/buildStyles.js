@@ -3,7 +3,6 @@ import autoprefixer from 'autoprefixer';
 import calc from 'postcss-calc';
 import cssnano from 'cssnano';
 import easyImport from 'postcss-easy-import';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import mixins from 'postcss-mixins';
 import mqpacker from 'postcss-sort-media-queries';
@@ -42,13 +41,12 @@ const configure = ({ customMedia = null, functions = null }) => {
 	}
 };
 
-export default async (globs, config = {}) => {
-	log.info('>> Building styles...', LOG_TITLE);
-
-	const files = await getPathsFromGlobs(globs);
+export default async (files, config = {}) => {
 	if (!files.length) {
 		return;
 	}
+
+	log.info('>> Building styles...', LOG_TITLE);
 
 	if (!processor) {
 		configure(config);
@@ -57,8 +55,8 @@ export default async (globs, config = {}) => {
 	try {
 		await Promise.all(
 			files.map(async (file) => {
-				const sourceCSS = await readFile(file, 'utf-8');
-				const { css } = await processor.process(sourceCSS, {
+				const source = await readFile(file, 'utf-8');
+				const { css } = await processor.process(source, {
 					from: file,
 					map: false
 				});

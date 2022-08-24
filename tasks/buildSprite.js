@@ -1,5 +1,4 @@
 import { Dest, isDev } from '../constants.js';
-import getPathsFromGlobs from '../lib/getPathsFromGlobs.js';
 import log from '../lib/log.js';
 import minifySvg from '../lib/minifySvg.js';
 import path from 'path';
@@ -20,13 +19,13 @@ const createMapper = (files) => (icon, i) => {
 	return icon.replace(/^<svg/, `<svg id="${path.basename(files[i], '.svg')}"`);
 };
 
-export default async (globs) => {
-	log.info('>> Building sprite...', LOG_TITLE);
-
-	const files = await getPathsFromGlobs(globs, false);
+export default async (files) => {
 	if (!files.length) {
 		return;
 	}
+
+	log.info('>> Building sprite...', LOG_TITLE);
+
 	const mapIcon = createMapper(files);
 
 	try {
