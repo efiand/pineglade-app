@@ -5,18 +5,16 @@ import writeFileSmart from '../lib/writeFileSmart.js';
 
 const LOG_TITLE = 'Svelte';
 
-export default async ({ layout, props, routes, ssrBundle }) => {
+export default async (config) => {
 	log.info(`>> ${isLint ? 'Testing' : 'Building'} HTML pages...`, LOG_TITLE);
 
 	try {
 		await Promise.all(
-			routes
+			config.routes
 				.filter(({ generate }) => generate)
 				.map(async ({ url }) => {
 					return await createHtml({
-						layout,
-						props,
-						ssrBundle,
+						...config,
 						url,
 						validate: true
 					}).then(async (content) => {

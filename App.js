@@ -49,7 +49,6 @@ const defaultConfig = {
 	layout: null,
 	notFoundUrl: '/404.html',
 	postcss: {},
-	props: {},
 	routes: [],
 	ssrBundle: null
 };
