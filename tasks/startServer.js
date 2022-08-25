@@ -6,23 +6,22 @@ import log from '../lib/log.js';
 import path from 'path';
 
 const LOG_TITLE = 'Fastify';
-const fastifyOptions = {
-	logger: {
-		file: path.resolve(CWD, '.app/app.log'),
-		level: isDev ? 'info' : 'warn'
-	},
-	trustProxy: true
-};
 
 export default async (app) => {
-	const server = fastify(fastifyOptions);
+	const server = fastify({
+		logger: {
+			file: path.resolve(CWD, app.config.serverLog),
+			level: isDev ? 'info' : 'warn'
+		},
+		trustProxy: true
+	});
 
 	log.info('>> Starting server...', LOG_TITLE);
 
 	server.register(fastifyStatic, { root: Dest.MAIN });
 	server.setNotFoundHandler(handleSvelteRoute(app, true));
 
-	app.config.routes.forEach(async (route) => await server.route(route));
+	app.config.routes.forEach((route) => server.route(route));
 
 	server.listen({ port });
 

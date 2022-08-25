@@ -1,0 +1,11 @@
+{
+	"extends": "pineglade",
+	"overrides": [
+		{
+			"files": "tools/wait.js",
+			"rules": {
+				"no-promise-executor-return": "off"
+			}
+		}
+	]
+}

@@ -19,7 +19,10 @@ export default async (config) => {
 						validate: true
 					}).then(async (content) => {
 						if (isBuild) {
-							await writeFileSmart(`${Dest.MAIN}${url}`, content);
+							await writeFileSmart(
+								`${Dest.MAIN}${url.endsWith('/') ? `${url}index.html` : url}`,
+								content
+							);
 						}
 					});
 				})

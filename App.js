@@ -27,7 +27,7 @@ import watch from './tasks/watch.js';
 
 const START_MESSAGE =
 	'>> Starting... See https://github.com/efiand/pineglade-app';
-const DEV_SCRIPT = 'source/scripts/dev.js';
+const DEV_SCRIPT = 'dev.js';
 const DELETE_ON_START = ['**/*.bundle.*', 'public/pixelperfect'];
 
 const globConfig = {
@@ -45,11 +45,11 @@ const ssrBundleDest = `${Dest.APP_OUTPUT}/${Dest.SSR_BUNDLE_NAME}`;
 
 const defaultConfig = {
 	devScript: null,
-	indexUrl: '/index.html',
 	layout: null,
 	notFoundUrl: '/404.html',
 	postcss: {},
 	routes: [],
+	serverLog: '.app/app.log',
 	ssrBundle: null
 };
 
@@ -72,25 +72,6 @@ export default class App {
 		this.unstateFile = this.#unstateFile.bind(this);
 	}
 
-	#addRoutes() {
-		this.config.routes = this.files.routeEntries.map(mapSvelteRoute(this));
-
-		const rootRoute = this.config.routes.find(({ url }) => url === '/');
-
-		if (!rootRoute) {
-			const indexRoute = this.config.routes.find(
-				({ url }) => url === this.config.indexUrl
-			);
-			if (indexRoute) {
-				this.config.routes.push({
-					...indexRoute,
-					generate: false,
-					url: '/'
-				});
-			}
-		}
-	}
-
 	async #build() {
 		await deleteAsync(DELETE_ON_START);
 
@@ -104,11 +85,7 @@ export default class App {
 
 	async #configure() {
 		if (this.files.configs.length) {
-			const config = await readFileSmart(
-				`${this.files.configs[0]}?${Date.now()}`,
-				'import',
-				{}
-			);
+			const config = await readFileSmart(this.files.configs[0], 'import', {});
 			this.config = {
 				...defaultConfig,
 				...config
@@ -117,7 +94,7 @@ export default class App {
 
 		if (!this.config.routes.length) {
 			if (this.files.routeEntries.length) {
-				this.#addRoutes();
+				this.config.routes = this.files.routeEntries.map(mapSvelteRoute(this));
 			} else {
 				return log.warn(
 					'No routes. Do you use static HTML in public folder?',
@@ -131,11 +108,13 @@ export default class App {
 		}
 		this.config.layout = await readFileSmart(this.files.layouts[0]);
 
-		const hasDevScript = Boolean(
-			this.files.scriptEntries.find((entry) => entry.endsWith(DEV_SCRIPT))
-		);
-		if (isDev && this.config.layout && !this.config.devScript && hasDevScript) {
-			this.config.devScript = DEV_SCRIPT;
+		if (isDev && this.config.layout && !this.config.devScript) {
+			const hasDevScript = Boolean(
+				this.files.scriptEntries.find((entry) => entry.endsWith(DEV_SCRIPT))
+			);
+			if (hasDevScript) {
+				this.config.devScript = DEV_SCRIPT.replace(/\.js$/, '.bundle.js');
+			}
 		}
 	}
 
@@ -157,19 +136,20 @@ export default class App {
 		lintSpaces(this.files.sources);
 
 		await Promise.all([
-			lintScripts(this.files.scripts),
+			lintScripts([this.files.scripts, this.files.markdowns].flat()),
 			lintStyles(this.files.styles)
 		]);
 	}
 
 	async #processHtml() {
+		if (isSelf) {
+			return;
+		}
+
 		await this.#configure();
 
 		if (!this.config.layout) {
-			return log.warn(
-				'No layout. Do you use static HTML in public folder?',
-				APP_NAME
-			);
+			return;
 		}
 
 		if (this.config.routes.length && !this.started) {

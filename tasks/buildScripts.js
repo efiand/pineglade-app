@@ -8,6 +8,7 @@ const LOG_TITLE = 'Webpack';
 
 const alias = {
 	'@': path.resolve(CWD, 'source'),
+	'@tools': path.resolve(CWD, 'node_modules/pineglade-app/tools'),
 	svelte: path.resolve(CWD, 'node_modules/svelte')
 };
 
